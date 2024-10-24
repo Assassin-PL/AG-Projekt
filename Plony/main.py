@@ -1,0 +1,1 @@
+#Tu dzialajacy skrypt, czyli to co jest w Algorytm,py i Visualization.py

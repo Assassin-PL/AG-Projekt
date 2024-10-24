@@ -1,0 +1,1 @@
+#Tu piszemy klasy i algorytmy do projektu
