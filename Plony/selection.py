@@ -1,13 +1,15 @@
 # selection.py
 
-import numpy as np
+import torch
 
-def tournament_selection(population, fitness_scores, num_parents, tournament_size=5):
-    selected = []
-    population_size = len(population)
+def tournament_selection(population, fitness_scores, num_parents, tournament_size=5, device='cpu'):
+    population_size = population.shape[0]
+    parents = []
+
     for _ in range(num_parents):
-        participants_indices = np.random.choice(population_size, tournament_size)
-        participants_fitness = fitness_scores[participants_indices]
-        winner_index = participants_indices[np.argmax(participants_fitness)]
-        selected.append(population[winner_index])
-    return np.array(selected)
+        indices = torch.randint(0, population_size, (tournament_size,), device=device)
+        selected_fitness = fitness_scores[indices]
+        winner_index = indices[torch.argmax(selected_fitness)]
+        parents.append(population[winner_index])
+
+    return torch.stack(parents)

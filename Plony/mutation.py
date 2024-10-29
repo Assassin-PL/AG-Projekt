@@ -1,14 +1,14 @@
 # mutation.py
 
-import numpy as np
+import torch
 
-def gaussian_mutation(offspring, mutation_rate, a, x0):
+def gaussian_mutation(offspring, mutation_rate, a, x0, device='cpu'):
     num_offspring, num_genes = offspring.shape
-    for i in range(num_offspring):
-        if np.random.rand() < mutation_rate:
-            gene_indices = np.random.choice(num_genes, size=1)
-            for gene_index in gene_indices:
-                offspring[i, gene_index] += np.random.normal(0, 0.1)
-                # Zapewnienie u_k >= 0
-                offspring[i, gene_index] = max(0, offspring[i, gene_index])
+    mutation_mask = (torch.rand((num_offspring, num_genes), device=device) < mutation_rate).float()
+    gaussian_noise = torch.randn((num_offspring, num_genes), device=device) * 0.1
+    mutation = gaussian_noise * mutation_mask
+    offspring += mutation
+
+    # Ensure u_k >= 0 and u_k <= a * x0
+    offspring = torch.clamp(offspring, min=0, max=a * x0)
     return offspring

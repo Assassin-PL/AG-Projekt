@@ -1,6 +1,6 @@
 # algorytm.py
 
-import numpy as np
+import torch
 from fitness import calculate_fitness
 from selection import tournament_selection
 from crossover import arithmetic_crossover
@@ -9,7 +9,7 @@ from constraints import ensure_constraints
 from utils import initialize_population
 
 class EGA:
-    def __init__(self, a, x0, N, population_size, num_generations, mutation_rate, elitism_rate):
+    def __init__(self, a, x0, N, population_size, num_generations, mutation_rate, elitism_rate, device='cpu'):
         self.a = a
         self.x0 = x0
         self.N = N
@@ -17,9 +17,10 @@ class EGA:
         self.num_generations = num_generations
         self.mutation_rate = mutation_rate
         self.elitism_rate = elitism_rate
+        self.device = device
 
-        # Inicjalizacja populacji
-        self.population = initialize_population(population_size, N, a, x0)
+        # Inicjalizacja populacji jako tensor PyTorch na określonym urządzeniu
+        self.population = initialize_population(population_size, N, a, x0, device=self.device)
         self.fitness_history = []
         self.best_solution = None
         self.best_fitness = None
@@ -27,49 +28,52 @@ class EGA:
     def run(self):
         for generation in range(self.num_generations):
             # Obliczanie przystosowania
-            fitness_scores = calculate_fitness(self.population, self.a, self.x0)
+            fitness_scores = calculate_fitness(self.population, self.a, self.x0, device=self.device)
 
             # Zapis najlepszego przystosowania
-            self.fitness_history.append(np.max(fitness_scores))
+            best_fitness = torch.max(fitness_scores).item()
+            self.fitness_history.append(best_fitness)
 
             # Wybór elity
             num_elites = int(self.elitism_rate * self.population_size)
-            elites_indices = np.argsort(fitness_scores)[-num_elites:]
+            elites_indices = torch.topk(fitness_scores, num_elites).indices
             elites = self.population[elites_indices]
 
             # Selekcja rodziców
-            parents = tournament_selection(self.population, fitness_scores, self.population_size - num_elites)
+            num_offspring = self.population_size - num_elites
+            parents = tournament_selection(self.population, fitness_scores, num_offspring, device=self.device)
+
+            # Zapewnienie parzystej liczby rodziców
+            if parents.shape[0] % 2 != 0:
+                parents = torch.cat([parents, parents[:1]], dim=0)
+
+            # Podział rodziców na pary
+            parents1 = parents[::2]
+            parents2 = parents[1::2]
 
             # Generowanie potomstwa
-            offspring = []
-            for i in range(0, len(parents), 2):
-                parent1 = parents[i]
-                parent2 = parents[(i + 1) % len(parents)]
-                child1, child2 = arithmetic_crossover(parent1, parent2)
-                offspring.append(child1)
-                offspring.append(child2)
-            offspring = np.array(offspring)
+            offspring = arithmetic_crossover(parents1, parents2)
 
             # Mutacja
-            offspring = gaussian_mutation(offspring, self.mutation_rate, self.a, self.x0)
+            offspring = gaussian_mutation(offspring, self.mutation_rate, self.a, self.x0, device=self.device)
 
             # Zapewnienie ograniczeń
-            offspring = ensure_constraints(offspring, self.a, self.x0)
+            offspring = ensure_constraints(offspring, self.a, self.x0, device=self.device)
 
             # Tworzenie nowej populacji
-            self.population = np.vstack((elites, offspring[:self.population_size - num_elites]))
+            self.population = torch.cat([elites, offspring], dim=0)[:self.population_size]
 
             # Opcjonalne wyświetlanie postępu
             if generation % 10 == 0:
-                best_fitness = np.max(fitness_scores)
                 print(f'Generacja {generation}: Najlepsze przystosowanie = {best_fitness}')
 
         # Po ewolucji, wybór najlepszego rozwiązania
-        fitness_scores = calculate_fitness(self.population, self.a, self.x0)
-        best_index = np.argmax(fitness_scores)
-        self.best_solution = self.population[best_index]
-        self.best_fitness = fitness_scores[best_index]
+        fitness_scores = calculate_fitness(self.population, self.a, self.x0, device=self.device)
+        best_index = torch.argmax(fitness_scores)
+        self.best_solution = self.population[best_index].cpu().numpy()
+        self.best_fitness = fitness_scores[best_index].item()
 
+    # **Dodanie brakujących metod**
     def get_best_solution(self):
         return self.best_solution
 
