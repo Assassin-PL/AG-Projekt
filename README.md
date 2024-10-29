@@ -1,4 +1,4 @@
-# Elitarny Algorytm Genetyczny (EGA) dla Problemu Zbioru Plonów
+# Elitist Genetic Algorithm (EGA) dla Problemu Zbioru Plonów
 
 Ten projekt implementuje **Elitarny Algorytm Genetyczny (EGA)** w celu rozwiązania problemu zbioru plonów, który jest zadaniem optymalizacji z ograniczeniami. Celem jest maksymalizacja wydajności zbioru przy jednoczesnym spełnieniu równania wzrostu i nałożonych ograniczeń.
 
