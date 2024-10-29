@@ -1,58 +1,154 @@
-# Elitist Genetic Algorithm (EGA) for Harvest Collection Problem
+# Elitarny Algorytm Genetyczny (EGA) dla Problemu Zbioru Plonów
 
-This project implements an Elitist Genetic Algorithm (EGA) to solve the harvest collection problem, which is a constrained optimization task. The goal is to maximize the harvest yield while respecting the growth equation and constraints.
+Ten projekt implementuje **Elitarny Algorytm Genetyczny (EGA)** w celu rozwiązania problemu zbioru plonów, który jest zadaniem optymalizacji z ograniczeniami. Celem jest maksymalizacja wydajności zbioru przy jednoczesnym spełnieniu równania wzrostu i nałożonych ograniczeń.
 
-## Problem Description
+## Opis Problemu
 
-The harvest collection problem involves maximizing the final yield over a given number of time periods (`N`), subject to the following constraints:
+Problem zbioru plonów polega na maksymalizacji funkcji celu:
 
-- **Growth equation:**  
-  \( x_{n+1} = a \cdot x_n - u_n \), where:
-  - \( a \) is a constant growth factor (e.g., 1.1)
-  - \( x_0 \) is the initial state (e.g., 100)
-  - \( u_n \) is the control variable representing the amount harvested in period \( n \)
+\[
+J = \sum_{k=0}^{N-1} \sqrt{u_k}
+\]
 
-- **Control constraints:**  
-  \( u_n \geq 0 \) for all \( n \), ensuring non-negative harvests.
+przy następujących ograniczeniach:
 
-- **Equality constraint:**  
-  \( \sum_{n=0}^{N-1} u_n = x_0 \), meaning that the total amount harvested over all periods equals the initial state.
+- **Równanie wzrostu:**
 
-## Elitist Genetic Algorithm (EGA)
+  \[
+  x_{k+1} = a \cdot x_k - u_k
+  \]
 
-The EGA is an evolutionary algorithm that aims to find the optimal harvesting strategy by iteratively evolving a population of solutions. It uses the concept of elitism, where the best-performing individuals (solutions) from each generation are carried over to the next generation to preserve high-quality solutions.
+  gdzie:
 
-### Key Features of EGA:
+  - \( a \) to stały współczynnik wzrostu (np. \( a = 1.1 \))
+  - \( x_0 \) to stan początkowy (np. \( x_0 = 100 \))
+  - \( u_k \) to zmienna sterująca reprezentująca ilość zbioru w okresie \( k \)
 
-1. **Elitism:** The best individuals are directly copied to the next generation, ensuring that the quality of solutions is maintained.
-2. **Genetic Operators:**
-   - **Selection:** Tournament selection is used to choose parents for crossover.
-   - **Crossover:** One-point crossover is applied to combine solutions from two parents.
-   - **Mutation:** Random perturbations are applied to introduce variability in the offspring.
-3. **Constraint Handling:** Special mechanisms are implemented to ensure that the sum of harvested amounts satisfies the equality constraint, and all values remain non-negative.
+- **Ograniczenia sterowania:**
 
-## Parameters
+  \[
+  u_k \geq 0
+  \]
 
-The algorithm allows for the following customizable parameters:
-- `N`: Number of periods (e.g., [2, 4, 10, 20, 45])
-- `a`: Growth factor (default: 1.1)
-- `x0`: Initial state (default: 100)
-- `Population size`: Number of solutions in the population
-- `Number of generations`: Total number of iterations for evolution
-- `Mutation rate`: Probability of mutation applied to an individual
-- `Elitism rate`: Fraction of top individuals retained in the next generation
+  dla każdego \( k \), co zapewnia nieujemne wartości zbioru.
 
-## Installation and Usage
+- **Ograniczenie równości:**
 
-### Prerequisites
+  \[
+  x_0 = x_N
+  \]
 
-Ensure you have Python 3.x and the necessary libraries installed:
-- `numpy` for numerical operations
-- `matplotlib` (optional, for plotting results)
+  co oznacza, że stan na początku i końcu okresu jest taki sam.
 
-### Running the Algorithm
+## Elitarny Algorytm Genetyczny (EGA)
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/harvest-ega.git
-   cd harvest-ega
+EGA jest zastosowany do rozwiązania tego problemu poprzez modelowanie procesu ewolucyjnego, który optymalizuje funkcję celu z zachowaniem ograniczeń.
+
+### Implementacja Algorytmu
+
+#### Populacja Osobników
+
+- **Reprezentacja osobników:**
+
+  Każdy osobnik jest wektorem rzeczywistych liczb:
+
+  \[
+  u = [u_0, u_1, ..., u_{N-1}]
+  \]
+
+  gdzie \( u_k \) to ilość zbioru w okresie \( k \).
+
+- **Rozmiar populacji:**
+
+  100 osobników.
+
+- **Inicjalizacja populacji:**
+
+  Wartości \( u_k \) są inicjalizowane losowo z zakresu \([0, a \cdot x_0]\), przy zapewnieniu spełnienia ograniczeń problemu.
+
+#### Funkcja Celu
+
+- **Cel:**
+
+  Maksymalizacja funkcji celu:
+
+  \[
+  J = \sum_{k=0}^{N-1} \sqrt{u_k}
+  \]
+
+- **Ograniczenia:**
+
+  - **Równanie wzrostu:** \( x_{k+1} = a \cdot x_k - u_k \)
+  - **Ograniczenie równości:** \( x_0 = x_N \)
+  - **Nieujemność:** \( u_k \geq 0 \) oraz \( x_k \geq 0 \)
+
+#### Selekcja
+
+- **Metoda selekcji:**
+
+  **Selekcja turniejowa**
+
+- **Opis:**
+
+  Losowo wybierane są grupy osobników (np. po 5), a z każdej grupy wybierany jest osobnik z najwyższą wartością funkcji celu do puli rodziców.
+
+#### Operatory Genetyczne
+
+- **Krzyżowanie:**
+
+  - **Typ:** Krzyżowanie arytmetyczne
+  - **Mechanizm:**
+
+    Potomkowie są tworzeni jako kombinacja liniowa genów rodziców:
+
+    \[
+    \text{Potomek} = \alpha \cdot \text{Rodzic}_1 + (1 - \alpha) \cdot \text{Rodzic}_2
+    \]
+
+    gdzie \( \alpha \) jest losową liczbą z zakresu \([0,1]\).
+
+- **Mutacja:**
+
+  - **Typ:** Mutacja gaussowska
+  - **Mechanizm:**
+
+    Do genów potomków dodawany jest szum gaussowski o średniej 0 i odchyleniu standardowym \( \sigma \), zapewniając zachowanie ograniczeń.
+
+#### Subpopulacja
+
+- **Elitarność:**
+
+  Najlepsze 5% osobników jest bezpośrednio przenoszone do następnej generacji bez zmian.
+
+#### Podstawienie
+
+- **Metoda:**
+
+  **Reprodukcja częściowa** - połączenie elity z nowo wygenerowanym potomstwem tworzy nową populację.
+
+## Struktura Projektu
+
+Projekt składa się z następujących plików:
+
+- **`main.py`**: Główny plik uruchamiający algorytm EGA z klasy.
+- **`algorytm.py`**: Plik z klasą algorytmu EGA.
+- **`fitness.py`**: Zawiera implementację funkcji celu oraz sprawdzanie ograniczeń.
+- **`selection.py`**: Implementuje selekcję turniejową.
+- **`crossover.py`**: Zawiera funkcje krzyżowania arytmetycznego.
+- **`mutation.py`**: Odpowiada za mutację gaussowską.
+- **`constraints.py`**: Zapewnia spełnienie ograniczeń przez osobniki.
+- **`Visualization.py`**: Odpowiada za wizualizację wyników algorytmu.
+- **`utils.py`**: Zawiera funkcje pomocnicze, np. inicjalizację populacji.
+
+## Użyte Biblioteki
+
+- **NumPy**: Do operacji numerycznych i manipulacji tablicami.
+- **Matplotlib**: Do wizualizacji wyników.
+
+## Uruchomienie
+
+Instrukcje dotyczące uruchamiania projektu zostaną dodane w przyszłości.
+
+---
+
+*Uwaga:* Szczegółowe implementacje funkcji w poszczególnych modułach powinny zostać uzupełnione zgodnie z powyższymi opisami.
