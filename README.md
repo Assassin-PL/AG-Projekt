@@ -4,19 +4,35 @@ This project implements an Elitist Genetic Algorithm (EGA) to solve the harvest 
 
 ## Problem Description
 
-The harvest collection problem involves maximizing the final yield over a given number of time periods (`N`), subject to the following constraints:
+The harvest collection problem is defined as a maximization task, with the objective function:
+
+![Objective Function](./images/objective_function.png)
+
+where \( J \) is the objective function that we want to maximize, defined as:
+
+\[
+J = \sum_{k=0}^{N-1} \sqrt{u_k}
+\]
+
+subject to the following constraints:
 
 - **Growth equation:**  
-  \( x_{n+1} = a \cdot x_n - u_n \), where:
-  - \( a \) is a constant growth factor (e.g., 1.1)
-  - \( x_0 \) is the initial state (e.g., 100)
-  - \( u_n \) is the control variable representing the amount harvested in period \( n \)
-
-- **Control constraints:**  
-  \( u_n \geq 0 \) for all \( n \), ensuring non-negative harvests.
+  \( x_{k+1} = a \cdot x_k - u_k \), where:
+  - \( a \) is a constant growth factor (e.g., \( a = 1.1 \))
+  - \( x_0 \) is the initial state (e.g., \( x_0 = 100 \))
+  - \( u_k \) is the control variable representing the amount harvested in period \( k \) with \( u_k \geq 0 \).
 
 - **Equality constraint:**  
-  \( \sum_{n=0}^{N-1} u_n = x_0 \), meaning that the total amount harvested over all periods equals the initial state.
+  \( x_0 = x_N \), ensuring that the state at the beginning and end of the period is the same.
+
+In this problem:
+- \( x_k \in \mathbb{R} \) represents the state variable.
+- \( u_k \in \mathbb{R}^+ \) represents the (non-negative) control variable for each period.
+
+The parameters for solving the task are:
+- \( a = 1.1 \)
+- \( x_0 = 100 \)
+- \( N = [2, 4, 10, 20, 45] \)
 
 ## Elitist Genetic Algorithm (EGA)
 
@@ -29,7 +45,7 @@ The EGA is an evolutionary algorithm that aims to find the optimal harvesting st
    - **Selection:** Tournament selection is used to choose parents for crossover.
    - **Crossover:** One-point crossover is applied to combine solutions from two parents.
    - **Mutation:** Random perturbations are applied to introduce variability in the offspring.
-3. **Constraint Handling:** Special mechanisms are implemented to ensure that the sum of harvested amounts satisfies the equality constraint, and all values remain non-negative.
+3. **Constraint Handling:** Special mechanisms are implemented to ensure that the solution respects the growth equation and the equality constraint.
 
 ## Parameters
 
