@@ -3,17 +3,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 def plot_convergence(fitness_history, N):
     plt.figure(figsize=(10, 6))
-    plt.plot(fitness_history)
+    generations = np.arange(len(fitness_history))
+    plt.plot(generations, fitness_history, marker='o', linestyle='-')
     plt.xlabel('Generacja')
     plt.ylabel('Najlepsze przystosowanie')
     plt.title(f'Konwergencja Algorytmu Genetycznego dla N = {N}')
     plt.grid(True)
-    plt.show()
+    # plt.show()
     # Jeśli chcesz zapisać wykres:
-    # plt.savefig(f'convergence_N_{N}.png')
+    plt.savefig(f'convergence_N_{N}.png')
 
 
 def plot_solution(u, a, x0, N):
@@ -39,6 +39,25 @@ def plot_solution(u, a, x0, N):
 
     plt.title(f'Optymalny Zbiór i Stan w Czasie dla N = {N}')
     fig.tight_layout()
-    plt.show()
+    # plt.show()
     # Jeśli chcesz zapisać wykres:
-    # plt.savefig(f'solution_N_{N}.png')
+    plt.savefig(f'solution_N_{N}.png')
+
+
+def plot_fitness_over_generations(fitness_values, N):
+    """
+    Wykres wartości funkcji celu dla każdego pokolenia.
+
+    :param fitness_values: Lista wartości funkcji celu w kolejnych pokoleniach.
+    :param N: Aktualna wartość N.
+    """
+    plt.figure(figsize=(10, 6))
+    generations = np.arange(len(fitness_values))
+    plt.plot(generations, fitness_values, marker='o', linestyle='-')
+    plt.xlabel('Generacja')
+    plt.ylabel('Wartość funkcji celu')
+    plt.title(f'Wartość Funkcji Celu w Kolejnych Generacjach dla N = {N}')
+    plt.grid(True)
+    # plt.show()
+    # Jeśli chcesz zapisać wykres:
+    plt.savefig(f'objective_function_N_{N}.png')

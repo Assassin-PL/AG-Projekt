@@ -43,7 +43,7 @@ for N in N_list:
     # Pobranie wyników
     best_solution = ega.get_best_solution()
     best_fitness = ega.get_best_fitness()
-    fitness_history = ega.get_fitness_history()
+    fitness_history = ega.get_fitness_history()  # Zawiera najlepsze przystosowanie w każdej generacji
 
     # Wyświetlenie wyników
     print(f"Najlepsze znalezione rozwiązanie dla N = {N}:")
@@ -64,3 +64,5 @@ for N in N_list:
     # Wizualizacja wyników
     Visualization.plot_convergence(fitness_history, N)
     Visualization.plot_solution(best_solution, a, x0, N)
+    # Wywołanie nowej funkcji wizualizacyjnej
+    Visualization.plot_fitness_over_generations(fitness_history, N)
