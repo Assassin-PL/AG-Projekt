@@ -66,3 +66,7 @@ for N in N_list:
     Visualization.plot_solution(best_solution, a, x0, N)
     # Wywołanie nowej funkcji wizualizacyjnej
     Visualization.plot_fitness_over_generations(fitness_history, N)
+    #dodac srednie przystosowanie i wykres jak byly szukane te parametry , na osi x beda iteracje
+    #jak sie sterowania przedstawiaja
+    #w sprawozdaniu porównac z wynikami z ksiazki trzeba!
+    #lepiej zrobic w wykresach slupkowych
