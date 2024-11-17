@@ -15,14 +15,22 @@ def calculate_fitness(population, a, x0, device='cpu'):
         u_k = population[:, k]
         x[:, k+1] = a * x[:, k] - u_k
 
-        # Kary za ujemne u_k
-        penalty += 1e6 * torch.relu(-u_k)
-        # Kary za ujemne x_{k+1}
-        penalty += 1e6 * torch.relu(-x[:, k+1])
+    # Kary za ujemne u_k
+    penalty += torch.sum(torch.relu(-population) ** 2, dim=1)
+
+    # Kary za ujemne x_k
+    penalty += torch.sum(torch.relu(-x[:, 1:]) ** 2, dim=1)
 
     # Kara za niespełnienie x_0 = x_N
-    penalty += 1e6 * torch.abs(x[:, -1] - x0)
+    penalty += (x[:, -1] - x0) ** 2
 
-    fitness = torch.sum(torch.sqrt(torch.clamp(population, min=0)), dim=1) - penalty
+    # Obliczanie funkcji celu
+    objective = torch.sum(torch.sqrt(torch.clamp(population, min=0) + 1e-8), dim=1)
+
+    # Funkcja przystosowania
+    fitness = objective - penalty
+
+    # Zapewnienie nieujemnych wartości funkcji przystosowania
+    fitness = torch.clamp(fitness, min=0)
 
     return fitness

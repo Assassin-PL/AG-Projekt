@@ -2,9 +2,9 @@
 
 import torch
 from fitness import calculate_fitness
-from selection import tournament_selection
-from crossover import arithmetic_crossover
-from mutation import gaussian_mutation
+from selection import tournament_selection, deterministic_tournament_selection, mate_parents
+from crossover import arithmetic_crossover, advanced_blx_alpha_crossover
+from mutation import non_uniform_mutation, gaussian_mutation
 from constraints import ensure_constraints
 from utils import initialize_population
 
@@ -41,8 +41,8 @@ class EGA:
 
             # Selekcja rodziców
             num_offspring = self.population_size - num_elites
-            parents = tournament_selection(self.population, fitness_scores, num_offspring, device=self.device)
-
+            # parents = tournament_selection(self.population, fitness_scores, num_offspring, device=self.device)
+            parents = deterministic_tournament_selection(self.population, fitness_scores, num_offspring, device=self.device)
             # Zapewnienie parzystej liczby rodziców
             if parents.shape[0] % 2 != 0:
                 parents = torch.cat([parents, parents[:1]], dim=0)
@@ -51,12 +51,13 @@ class EGA:
             parents1 = parents[::2]
             parents2 = parents[1::2]
 
-            # Generowanie potomstwa
-            offspring = arithmetic_crossover(parents1, parents2)
+            # Krzyżowanie
+            offspring = arithmetic_crossover(parents1, parents2, alpha=0.5)
+            # offspring = advanced_blx_alpha_crossover(parents1, parents2, generation, self.num_generations, alpha_min=0.1, alpha_max=0.5, a=self.a, x0=self.x0)
+            # Nowa funkcja mutacji
 
-            # Mutacja
-            offspring = gaussian_mutation(offspring, self.mutation_rate, self.a, self.x0, device=self.device)
-
+            # offspring = gaussian_mutation(offspring, self.mutation_rate, self.a, self.x0, device=self.device)
+            offspring = non_uniform_mutation(offspring, self.mutation_rate, self.a, self.x0, generation, self.num_generations, b=2, device=self.device)
             # Zapewnienie ograniczeń
             offspring = ensure_constraints(offspring, self.a, self.x0, device=self.device)
 
